@@ -225,7 +225,6 @@ export function AgentsPanel() {
               <p className="text-[10px] text-[var(--muted-foreground)] px-1 py-2">No agents in this category.</p>
             ) : (
               agents.map((agent) => {
-                const config = (agentConfigs as AgentConfigRow[] | undefined)?.find((c) => c.type === agent.id);
                 return (
                   <div
                     key={agent.id}
