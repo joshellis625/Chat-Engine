@@ -201,6 +201,27 @@ Then restart the server.
 
 ---
 
+## Accessing from Mobile (or Another Device)
+
+If you're running Marinara Engine on your computer and want to use it from your phone or tablet on the same network:
+
+1. **Find your computer's local IP address:**
+   - **Windows:** Open a terminal and run `ipconfig` — look for `IPv4 Address` (usually something like `192.168.x.x`)
+   - **macOS:** Go to System Settings → Wi-Fi → click your network → look for `IP Address`, or run `ipconfig getifaddr en0`
+   - **Linux:** Run `hostname -I` or `ip addr`
+
+2. **Open a browser on your phone** (Chrome, Brave, Safari, etc.) and go to:
+   ```
+   http://<your-computer-ip>:7860
+   ```
+   For example: `http://192.168.1.42:7860`
+
+3. **Install the PWA** — tap the browser menu and "Add to Home Screen" for a native app feel.
+
+> **Tip:** If you're not on the same Wi-Fi, tools like [Tailscale](https://tailscale.com/) give each device a stable IP on a private network — install it on both devices, then use the Tailscale IP of your computer instead.
+
+---
+
 ## Development
 
 ```bash
