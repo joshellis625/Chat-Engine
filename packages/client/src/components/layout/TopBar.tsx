@@ -25,7 +25,10 @@ export function TopBar() {
   const closeAllDetails = useUIStore((s) => s.closeAllDetails);
 
   return (
-    <header className="relative z-10 flex h-12 flex-shrink-0 items-center justify-between bg-[var(--card)]/80 px-3 backdrop-blur-sm">
+    <header
+      data-component="TopBar"
+      className="relative z-10 flex h-12 flex-shrink-0 items-center justify-between bg-[var(--card)]/80 px-3 backdrop-blur-sm"
+    >
       {/* Subtle bottom border only */}
       <div className="absolute inset-x-0 bottom-0 h-px bg-[var(--border)]/30" />
 
@@ -34,7 +37,7 @@ export function TopBar() {
         <button
           onClick={toggleSidebar}
           data-tour="sidebar-toggle"
-          className="rounded-lg p-2 text-[var(--muted-foreground)] transition-all hover:bg-[var(--accent)] hover:text-[var(--y2k-pink)] active:scale-95"
+          className="rounded-lg p-2 text-[var(--muted-foreground)] transition-all hover:bg-[var(--accent)] hover:text-[var(--primary)] active:scale-95"
           title="Chats"
         >
           <PanelLeft size="1.125rem" />
@@ -45,7 +48,7 @@ export function TopBar() {
             setActiveChatId(null);
             closeAllDetails();
           }}
-          className="rounded-lg p-2 text-[var(--muted-foreground)] transition-all hover:bg-[var(--accent)] hover:text-[var(--y2k-pink)] active:scale-95"
+          className="rounded-lg p-2 text-[var(--muted-foreground)] transition-all hover:bg-[var(--accent)] hover:text-[var(--primary)] active:scale-95"
           title="Home"
         >
           <Home size="1.125rem" />
@@ -53,7 +56,11 @@ export function TopBar() {
       </div>
 
       {/* Right section - Panel toggles */}
-      <div data-tour="panel-buttons" className="flex items-center gap-0.5 rounded-xl p-1 max-sm:gap-0 max-sm:p-0.5">
+      <nav
+        data-tour="panel-buttons"
+        aria-label="Panel navigation"
+        className="flex items-center gap-0.5 rounded-xl p-1 max-sm:gap-0 max-sm:p-0.5"
+      >
         {RIGHT_PANEL_BUTTONS.map(({ panel, icon: Icon, label, color }) => {
           const isActive = rightPanelOpen && rightPanel === panel;
           return (
@@ -63,8 +70,8 @@ export function TopBar() {
               className={cn(
                 "relative rounded-lg p-2 transition-all duration-200 max-sm:p-1.5",
                 isActive
-                  ? "bg-[var(--accent)] text-[var(--y2k-pink)] shadow-sm shadow-pink-500/10"
-                  : "text-[var(--muted-foreground)] hover:text-[var(--y2k-pink)]",
+                  ? "bg-[var(--accent)] text-[var(--primary)] shadow-sm"
+                  : "text-[var(--muted-foreground)] hover:text-[var(--primary)]",
               )}
               title={label}
             >
@@ -80,7 +87,7 @@ export function TopBar() {
             </button>
           );
         })}
-      </div>
+      </nav>
     </header>
   );
 }

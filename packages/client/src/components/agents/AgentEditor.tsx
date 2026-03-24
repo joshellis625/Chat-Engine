@@ -343,7 +343,7 @@ export function AgentEditor() {
         >
           <ArrowLeft size="1.125rem" />
         </button>
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--y2k-pink)] to-[var(--y2k-purple)] text-white shadow-sm max-md:h-8 max-md:w-8">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primary)] text-[var(--primary-foreground)] shadow-sm max-md:h-8 max-md:w-8">
           <Sparkles size="1.125rem" className="max-md:!h-[0.875rem] max-md:!w-[0.875rem]" />
         </div>
         <input
@@ -378,7 +378,7 @@ export function AgentEditor() {
           <button
             onClick={handleSave}
             disabled={isPending}
-            className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[var(--y2k-pink)] to-[var(--y2k-purple)] px-4 py-2 text-xs font-medium text-white shadow-md transition-all hover:shadow-lg active:scale-[0.98] disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-xl bg-[var(--primary)] px-4 py-2 text-xs font-medium text-[var(--primary-foreground)] shadow-md transition-all hover:shadow-lg active:scale-[0.98] disabled:opacity-50"
           >
             <Save size="0.8125rem" /> <span className="max-md:hidden">Save</span>
           </button>
@@ -432,7 +432,7 @@ export function AgentEditor() {
           {/* ── Description ── */}
           <FieldGroup
             label="Description"
-            icon={<Info size="0.875rem" className="text-[var(--y2k-pink)]" />}
+            icon={<Info size="0.875rem" className="text-[var(--primary)]" />}
             help="A short summary of what this agent does. Shown in the agents panel to help you identify each agent."
           >
             <input
@@ -449,7 +449,7 @@ export function AgentEditor() {
           {/* ── Pipeline Phase ── */}
           <FieldGroup
             label="Pipeline Phase"
-            icon={<Zap size="0.875rem" className="text-[var(--y2k-pink)]" />}
+            icon={<Zap size="0.875rem" className="text-[var(--primary)]" />}
             help="When this agent runs during generation. Pre-Generation runs before the AI replies, Parallel runs alongside, Post-Processing runs after the reply is complete."
           >
             <div className="grid grid-cols-3 gap-2">
@@ -482,7 +482,7 @@ export function AgentEditor() {
           {/* ── Connection Override ── */}
           <FieldGroup
             label="Connection Override"
-            icon={<Link2 size="0.875rem" className="text-[var(--y2k-pink)]" />}
+            icon={<Link2 size="0.875rem" className="text-[var(--primary)]" />}
             help="Use a different AI connection for this agent. For example, use a faster/cheaper model for background processing tasks."
           >
             <select
@@ -508,7 +508,7 @@ export function AgentEditor() {
           {/* ── Context Size ── */}
           <FieldGroup
             label="Context Size"
-            icon={<Clock size="0.875rem" className="text-[var(--y2k-pink)]" />}
+            icon={<Clock size="0.875rem" className="text-[var(--primary)]" />}
             help="How many recent chat messages this agent receives as context. More messages = more context but higher token usage. Leave blank for the default (8 messages)."
           >
             <div className="flex items-center gap-3">
@@ -535,7 +535,7 @@ export function AgentEditor() {
           {/* ── Inject as Prompt Section ── */}
           <FieldGroup
             label="Add as Prompt Section"
-            icon={<Layers size="0.875rem" className="text-[var(--y2k-pink)]" />}
+            icon={<Layers size="0.875rem" className="text-[var(--primary)]" />}
             help="When enabled, this agent's output becomes available as a marker section in prompt presets. Add the section in your preset to inject the agent's latest data into the prompt."
           >
             <button
@@ -917,7 +917,7 @@ export function AgentEditor() {
           {/* ── Prompt Template ── */}
           <FieldGroup
             label="Prompt Template"
-            icon={<FileText size="0.875rem" className="text-[var(--y2k-pink)]" />}
+            icon={<FileText size="0.875rem" className="text-[var(--primary)]" />}
             help="The system instructions this agent receives. Built-in agents have sensible defaults. You can override to customize behavior."
           >
             {/* Toolbar — only show default/override status for built-in agents */}
@@ -985,7 +985,7 @@ export function AgentEditor() {
           {/* ── Available Tools (Function Calling) ── */}
           <FieldGroup
             label="Tools / Function Calling"
-            icon={<Wrench size="0.875rem" className="text-[var(--y2k-pink)]" />}
+            icon={<Wrench size="0.875rem" className="text-[var(--primary)]" />}
             help="Select which tools this agent can use during generation. The AI can call these functions and receive results back for multi-step interactions."
           >
             <p className="text-[0.625rem] text-[var(--muted-foreground)] mb-3">
@@ -1120,8 +1120,8 @@ function ToolCard({
             className={cn(
               "flex h-6 w-6 shrink-0 items-center justify-center rounded-lg",
               isCustom
-                ? "bg-[var(--y2k-pink)]/15 text-[var(--y2k-pink)]"
-                : "bg-[var(--y2k-purple)]/15 text-[var(--y2k-purple)]",
+                ? "bg-[var(--primary)]/15 text-[var(--primary)]"
+                : "bg-[var(--muted)]/15 text-[var(--muted-foreground)]",
             )}
           >
             <Wrench size="0.75rem" />
@@ -1129,7 +1129,7 @@ function ToolCard({
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold font-mono text-[var(--foreground)]">
               {tool.name}
-              {isCustom && <span className="ml-1.5 text-[0.5625rem] font-normal text-[var(--y2k-pink)]">custom</span>}
+              {isCustom && <span className="ml-1.5 text-[0.5625rem] font-normal text-[var(--primary)]">custom</span>}
             </p>
             <p className="text-[0.625rem] text-[var(--muted-foreground)] truncate">{tool.description}</p>
           </div>
@@ -1149,7 +1149,7 @@ function ToolCard({
                   {isRequired && <span className="text-red-400">*</span>}
                 </code>
                 <span className="text-[var(--muted-foreground)]">
-                  <span className="text-[var(--y2k-pink)]">{p.type}</span>
+                  <span className="text-[var(--primary)]">{p.type}</span>
                   {p.description && ` — ${p.description}`}
                   {p.enum && <span className="ml-1 text-[0.625rem]">[{p.enum.join(", ")}]</span>}
                 </span>

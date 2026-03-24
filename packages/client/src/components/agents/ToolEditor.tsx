@@ -218,7 +218,7 @@ export function ToolEditor() {
         >
           <ArrowLeft size="1.125rem" />
         </button>
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--y2k-purple)] to-[var(--y2k-pink)] text-white shadow-sm">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primary)] text-[var(--primary-foreground)] shadow-sm">
           <Wrench size="1.125rem" />
         </div>
         <input
@@ -253,7 +253,7 @@ export function ToolEditor() {
           <button
             onClick={handleSave}
             disabled={isPending}
-            className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[var(--y2k-purple)] to-[var(--y2k-pink)] px-4 py-2 text-xs font-medium text-white shadow-md transition-all hover:shadow-lg active:scale-[0.98] disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-xl bg-[var(--primary)] px-4 py-2 text-xs font-medium text-[var(--primary-foreground)] shadow-md transition-all hover:shadow-lg active:scale-[0.98] disabled:opacity-50"
           >
             <Save size="0.8125rem" /> Save
           </button>
@@ -314,7 +314,7 @@ export function ToolEditor() {
           {/* ── Description ── */}
           <FieldGroup
             label="Description"
-            icon={<Info size="0.875rem" className="text-[var(--y2k-purple)]" />}
+            icon={<Info size="0.875rem" className="text-[var(--primary)]" />}
             help="Tell the AI what this tool does. Be descriptive — the AI reads this to decide when and how to call your tool."
           >
             <input
@@ -331,7 +331,7 @@ export function ToolEditor() {
           {/* ── Parameters ── */}
           <FieldGroup
             label="Parameters"
-            icon={<Code2 size="0.875rem" className="text-[var(--y2k-purple)]" />}
+            icon={<Code2 size="0.875rem" className="text-[var(--primary)]" />}
             help="The input arguments the AI can pass when calling this tool. Each parameter has a name, type, and description."
           >
             <p className="text-[0.625rem] text-[var(--muted-foreground)] mb-3">
@@ -423,7 +423,7 @@ export function ToolEditor() {
           </FieldGroup>
 
           {/* ── Execution Type ── */}
-          <FieldGroup label="Execution Type" icon={<Wrench size="0.875rem" className="text-[var(--y2k-purple)]" />}>
+          <FieldGroup label="Execution Type" icon={<Wrench size="0.875rem" className="text-[var(--primary)]" />}>
             <div className="grid grid-cols-3 gap-2">
               {EXEC_TYPES.map((et) => {
                 const isActive = localExecType === et.value;
@@ -453,7 +453,7 @@ export function ToolEditor() {
 
           {/* ── Execution Config ── */}
           {localExecType === "static" && (
-            <FieldGroup label="Static Result" icon={<FileText size="0.875rem" className="text-[var(--y2k-purple)]" />}>
+            <FieldGroup label="Static Result" icon={<FileText size="0.875rem" className="text-[var(--primary)]" />}>
               <textarea
                 value={localStaticResult}
                 onChange={(e) => {
@@ -472,7 +472,7 @@ export function ToolEditor() {
           )}
 
           {localExecType === "webhook" && (
-            <FieldGroup label="Webhook URL" icon={<Globe size="0.875rem" className="text-[var(--y2k-purple)]" />}>
+            <FieldGroup label="Webhook URL" icon={<Globe size="0.875rem" className="text-[var(--primary)]" />}>
               <input
                 value={localWebhookUrl}
                 onChange={(e) => {
@@ -491,7 +491,7 @@ export function ToolEditor() {
           )}
 
           {localExecType === "script" && (
-            <FieldGroup label="Script Body" icon={<Code2 size="0.875rem" className="text-[var(--y2k-purple)]" />}>
+            <FieldGroup label="Script Body" icon={<Code2 size="0.875rem" className="text-[var(--primary)]" />}>
               <textarea
                 value={localScriptBody}
                 onChange={(e) => {

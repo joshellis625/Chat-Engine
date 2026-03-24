@@ -3,6 +3,68 @@
    A faithful recreation of SillyTavern's classic
    dark UI. Activated via data-visual-theme="sillytavern"
    on :root. Disables Y2K effects and uses flat styling.
+   ═══════════════════════════════════════════════
+
+   THEME VARIABLE CONTRACT
+   ───────────────────────
+   Every visual theme must define the same set of CSS
+   custom properties so components can depend on a
+   single, stable interface. The complete list:
+
+   Core UI (25)
+     --background, --foreground,
+     --card, --card-foreground,
+     --popover, --popover-foreground,
+     --primary, --primary-foreground,
+     --secondary, --secondary-foreground,
+     --muted, --muted-foreground,
+     --accent, --accent-foreground,
+     --destructive, --destructive-foreground,
+     --border, --input, --ring, --radius,
+     --sidebar, --sidebar-foreground, --sidebar-border,
+     --sidebar-accent, --sidebar-accent-foreground
+
+   Glow (2)
+     --glow-primary, --glow-accent
+
+   Glass effects (5)
+     --glass-bg, --glass-border,
+     --glass-strong-bg, --glass-strong-border,
+     --glass-strong-shadow
+
+   Glow effects (5)
+     --glow-color-1, --glow-color-2, --glow-color-3,
+     --glow-sm-1, --glow-sm-2
+
+   Scrollbar (2)
+     --scrollbar-track, --scrollbar-border
+
+   Cursor (1)
+     --cursor-pink
+
+   Y2K palette (7)
+     --y2k-pink, --y2k-purple, --y2k-blue,
+     --y2k-mint, --y2k-peach, --y2k-lavender, --y2k-yellow
+
+   Pastel palette (8)
+     --pastel-rose, --pastel-lilac, --pastel-sky,
+     --pastel-mint, --pastel-coral, --pastel-peach,
+     --pastel-lavender, --pastel-periwinkle
+
+   RGB palette (8)
+     --rgb-red, --rgb-orange, --rgb-yellow, --rgb-green,
+     --rgb-cyan, --rgb-blue, --rgb-indigo, --rgb-violet
+
+   Font / Layout (2)
+     --font-y2k, --app-font-size
+
+   Total: 65 variables
+
+   NOTE: Even when a theme disables certain effects
+   (glass, glow, custom cursors, etc.) via CSS class
+   overrides, it should still define every variable so
+   the full contract is explicit. This makes it easy to
+   copy any theme file as a starting template.
    ═══════════════════════════════════════════════ */
 
 /* ─── Dark-mode variable overrides ─── */
@@ -64,8 +126,40 @@
   --rgb-indigo: #7a7aaa;
   --rgb-violet: #9070a0;
 
+  /* Glass effects — disabled via class overrides, but defined for contract completeness */
+  --glass-bg: linear-gradient(
+    135deg,
+    rgba(74, 114, 176, 0.04) 0%,
+    rgba(90, 90, 140, 0.04) 50%,
+    rgba(80, 160, 176, 0.04) 100%
+  );
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-strong-bg: linear-gradient(
+    135deg,
+    rgba(74, 114, 176, 0.08) 0%,
+    rgba(90, 90, 140, 0.08) 50%,
+    rgba(80, 160, 176, 0.08) 100%
+  );
+  --glass-strong-border: rgba(255, 255, 255, 0.1);
+  --glass-strong-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px rgba(255, 255, 255, 0.06);
+
+  /* Glow effect colors — effects disabled, but kept for completeness */
+  --glow-color-1: rgba(74, 114, 176, 0.15);
+  --glow-color-2: rgba(90, 90, 140, 0.1);
+  --glow-color-3: rgba(80, 160, 176, 0.05);
+  --glow-sm-1: rgba(74, 114, 176, 0.1);
+  --glow-sm-2: rgba(90, 90, 140, 0.05);
+
+  /* Scrollbar — restyled via class overrides, but vars defined for completeness */
+  --scrollbar-track: rgba(255, 255, 255, 0.04);
+  --scrollbar-border: rgba(0, 0, 0, 0.4);
+
+  /* Cursor — disabled via class overrides; no custom cursor SVG */
+  --cursor-pink: none;
+
   /* Font: Noto Sans is SillyTavern's house font */
   --font-y2k: "Straight Quotes", "Noto Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --app-font-size: 0.875rem;
 }
 
 /* ─── Light-mode overrides for ST theme ─── */
@@ -104,6 +198,29 @@
   --y2k-peach: #a07a4a;
   --y2k-lavender: #606088;
   --y2k-yellow: #9a8a30;
+
+  /* Glass effects — disabled via class overrides, but defined for contract completeness */
+  --glass-bg: linear-gradient(135deg, rgba(58, 96, 154, 0.04) 0%, rgba(90, 90, 128, 0.04) 100%);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --glass-strong-bg: linear-gradient(135deg, rgba(58, 96, 154, 0.08) 0%, rgba(90, 90, 128, 0.08) 100%);
+  --glass-strong-border: rgba(0, 0, 0, 0.08);
+  --glass-strong-shadow: 0 4px 16px rgba(0, 0, 0, 0.06), inset 0 1px rgba(255, 255, 255, 0.3);
+
+  /* Glow effect colors — effects disabled, but kept for completeness */
+  --glow-color-1: rgba(58, 96, 154, 0.12);
+  --glow-color-2: rgba(90, 90, 128, 0.08);
+  --glow-color-3: rgba(80, 160, 176, 0.04);
+  --glow-sm-1: rgba(58, 96, 154, 0.08);
+  --glow-sm-2: rgba(90, 90, 128, 0.04);
+
+  /* Scrollbar — restyled via class overrides, but vars defined for completeness */
+  --scrollbar-track: rgba(0, 0, 0, 0.06);
+  --scrollbar-border: rgba(0, 0, 0, 0.08);
+
+  /* Cursor — disabled; no custom cursor */
+  --cursor-pink: none;
+
+  --app-font-size: 0.875rem;
 }
 
 /* ─── Disable custom cursors ─── */
@@ -277,9 +394,15 @@
   border-bottom-color: var(--border);
 }
 
-[data-visual-theme="sillytavern"] .os-window-btn.close    { background: #c44040; }
-[data-visual-theme="sillytavern"] .os-window-btn.minimize  { background: #b09430; }
-[data-visual-theme="sillytavern"] .os-window-btn.maximize  { background: #409040; }
+[data-visual-theme="sillytavern"] .os-window-btn.close {
+  background: #c44040;
+}
+[data-visual-theme="sillytavern"] .os-window-btn.minimize {
+  background: #b09430;
+}
+[data-visual-theme="sillytavern"] .os-window-btn.maximize {
+  background: #409040;
+}
 
 [data-visual-theme="sillytavern"] .os-window-btn:hover {
   box-shadow: none;
@@ -339,8 +462,13 @@
 }
 
 @keyframes st-stream-pulse {
-  0%, 100% { box-shadow: 0 0 0 2px rgba(74, 114, 176, 0.3); }
-  50%      { box-shadow: 0 0 0 3px rgba(74, 114, 176, 0.5); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px rgba(74, 114, 176, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 3px rgba(74, 114, 176, 0.5);
+  }
 }
 
 /* ─── Texting bubbles → ST style ─── */

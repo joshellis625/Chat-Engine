@@ -742,7 +742,7 @@ function SectionsTab({
                         onClick={() => handleAddSection({ agentType: agent.type, agentName: agent.name })}
                         className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-[var(--foreground)] hover:bg-[var(--accent)]"
                       >
-                        <Sparkles size="0.8125rem" className="text-[var(--y2k-pink)]" /> {agent.name} (Agent)
+                        <Sparkles size="0.8125rem" className="text-[var(--primary)]" /> {agent.name} (Agent)
                       </button>
                     ))}
                   </>
@@ -1010,7 +1010,7 @@ function SectionsTab({
                           const isAgentMarker = mc.type === "agent_data";
                           return isAgentMarker ? (
                             <div className="space-y-2">
-                              <div className="rounded-lg bg-[var(--y2k-pink)]/5 p-3 text-xs text-pink-300">
+                              <div className="rounded-lg bg-[var(--primary)]/5 p-3 text-xs text-[var(--primary)]">
                                 Agent section: <strong>{section.name}</strong>
                                 <p className="mt-1 text-[var(--muted-foreground)]">
                                   The{" "}

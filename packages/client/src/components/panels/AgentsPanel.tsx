@@ -351,7 +351,7 @@ export function AgentsPanel() {
               key={tool.id}
               className="flex items-start gap-2.5 rounded-lg p-2 transition-colors hover:bg-[var(--sidebar-accent)]"
             >
-              <Wrench size="0.875rem" className="mt-0.5 shrink-0 text-[var(--y2k-purple)]" />
+              <Wrench size="0.875rem" className="mt-0.5 shrink-0 text-[var(--primary)]" />
               <button className="min-w-0 flex-1 text-left" onClick={() => openToolDetail(tool.id)}>
                 <div className="text-xs font-medium font-mono">{tool.name}</div>
                 <div className="text-[0.625rem] text-[var(--muted-foreground)] line-clamp-2">

@@ -52,7 +52,10 @@ export function AppShell() {
   const regexDetailId = useUIStore((s) => s.regexDetailId);
 
   return (
-    <div className="retro-scanlines noise-bg geometric-grid fixed inset-0 flex overflow-hidden bg-[var(--background)] max-md:pt-[env(safe-area-inset-top)]">
+    <div
+      data-component="AppShell"
+      className="retro-scanlines noise-bg geometric-grid fixed inset-0 flex overflow-hidden bg-[var(--background)] max-md:pt-[env(safe-area-inset-top)]"
+    >
       {/* Y2K decorative stars */}
       <div className="y2k-star hidden md:block" style={{ top: "10%", left: "5%", animationDelay: "0s" }} />
       <div className="y2k-star-md hidden md:block" style={{ top: "25%", right: "8%", animationDelay: "1.5s" }} />
@@ -71,6 +74,8 @@ export function AppShell() {
       {/* Left sidebar - Chat list */}
       <aside
         data-tour="sidebar"
+        data-component="ChatSidebarPanel"
+        aria-label="Chat list"
         className={cn(
           "flex-shrink-0 overflow-hidden bg-[var(--background)]/80 backdrop-blur-xl transition-[width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
           sidebarOpen && "border-r border-[var(--sidebar-border)]/30",
@@ -86,7 +91,12 @@ export function AppShell() {
       </aside>
 
       {/* Center content */}
-      <div data-tour="chat-area" className="flex flex-1 flex-col overflow-hidden">
+      <main
+        data-tour="chat-area"
+        data-component="CenterContent"
+        aria-label="Main content"
+        className="flex flex-1 flex-col overflow-hidden"
+      >
         <TopBar />
         {regexDetailId ? (
           <RegexScriptEditor />
@@ -107,7 +117,7 @@ export function AppShell() {
         ) : (
           <ChatArea />
         )}
-      </div>
+      </main>
 
       {/* Mobile right panel backdrop */}
       {rightPanelOpen && (
@@ -124,6 +134,8 @@ export function AppShell() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 350 }}
+              data-component="RightPanelMobile"
+              aria-label="Settings and tools panel"
               className="!fixed inset-y-0 right-0 z-50 !w-full shadow-2xl overflow-hidden bg-[var(--background)]/80 backdrop-blur-xl"
             >
               <RightPanel />
@@ -132,6 +144,8 @@ export function AppShell() {
         </AnimatePresence>
       ) : (
         <aside
+          data-component="RightPanelDesktop"
+          aria-label="Settings and tools panel"
           className={cn(
             "flex-shrink-0 overflow-hidden bg-[var(--background)]/80 backdrop-blur-xl transition-[width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
             rightPanelOpen && "border-l border-[var(--sidebar-border)]/30",

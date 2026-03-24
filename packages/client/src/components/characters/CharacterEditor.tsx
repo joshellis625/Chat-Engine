@@ -1179,7 +1179,7 @@ function SpritesTab({ characterId }: { characterId: string }) {
       <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 space-y-3">
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-semibold flex items-center gap-1.5">
-            <Upload size="0.8125rem" className="text-[var(--y2k-pink)]" />
+            <Upload size="0.8125rem" className="text-[var(--primary)]" />
             Add Sprite
           </h4>
           <button
@@ -1196,7 +1196,7 @@ function SpritesTab({ characterId }: { characterId: string }) {
         {/* Folder upload progress */}
         {folderProgress && (
           <div className="flex items-center gap-2 rounded-lg bg-[var(--secondary)] px-3 py-2 text-xs text-[var(--muted-foreground)]">
-            <Loader2 size="0.75rem" className="animate-spin text-[var(--y2k-pink)]" />
+            <Loader2 size="0.75rem" className="animate-spin text-[var(--primary)]" />
             Uploading {folderProgress.done}/{folderProgress.total} sprites…
           </div>
         )}
@@ -1213,7 +1213,7 @@ function SpritesTab({ characterId }: { characterId: string }) {
           <button
             onClick={() => newExpression.trim() && startUpload(newExpression.trim().toLowerCase())}
             disabled={!newExpression.trim() || uploading}
-            className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[var(--y2k-pink)] to-[var(--y2k-purple)] px-4 py-2 text-xs font-medium text-white shadow-sm transition-all hover:shadow-md disabled:opacity-40"
+            className="flex items-center gap-1.5 rounded-xl bg-[var(--primary)] px-4 py-2 text-xs font-medium text-[var(--primary-foreground)] shadow-sm transition-all hover:shadow-md disabled:opacity-40"
           >
             <Plus size="0.8125rem" />
             Upload

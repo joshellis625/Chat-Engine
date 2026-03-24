@@ -154,7 +154,7 @@ export function ChatSidebar() {
   }, [handleNewChat, activeTab]);
 
   return (
-    <div className="flex h-full flex-col">
+    <nav data-component="ChatSidebar" aria-label="Chat navigation" className="flex h-full flex-col">
       {/* Header */}
       <div className="relative flex h-12 items-center justify-between px-4">
         <div className="absolute inset-x-0 bottom-0 h-px bg-[var(--border)]/30" />
@@ -162,14 +162,14 @@ export function ChatSidebar() {
         <div className="flex items-center gap-1">
           <button
             onClick={handleNewChatFromTab}
-            className="rounded-lg p-1.5 text-[var(--muted-foreground)] transition-all hover:bg-[var(--sidebar-accent)] hover:text-[var(--y2k-pink)] active:scale-90"
+            className="rounded-lg p-1.5 text-[var(--muted-foreground)] transition-all hover:bg-[var(--sidebar-accent)] hover:text-[var(--primary)] active:scale-90"
             title={`New ${activeTab === "conversation" ? "Conversation" : "Roleplay"}`}
           >
             <Plus size="1rem" />
           </button>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="rounded-lg p-1.5 text-[var(--muted-foreground)] transition-all hover:bg-[var(--sidebar-accent)] hover:text-[var(--y2k-pink)] active:scale-90 md:hidden"
+            className="rounded-lg p-1.5 text-[var(--muted-foreground)] transition-all hover:bg-[var(--sidebar-accent)] hover:text-[var(--primary)] active:scale-90 md:hidden"
             title="Close"
           >
             <X size="1rem" />
@@ -484,7 +484,7 @@ export function ChatSidebar() {
           </div>
         )}
       </Modal>
-    </div>
+    </nav>
   );
 }
 

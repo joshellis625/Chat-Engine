@@ -251,6 +251,22 @@ function AppearanceSettings() {
     staleTime: Infinity,
   });
 
+  // Google Fonts download
+  const [googleFontName, setGoogleFontName] = useState("");
+  const queryClient = useQueryClient();
+  const googleFontMutation = useMutation({
+    mutationFn: (family: string) =>
+      api.post<{ filename: string; family: string; url: string }>("/fonts/google/download", { family }),
+    onSuccess: (data) => {
+      toast.success(`Installed "${data.family}"`);
+      setGoogleFontName("");
+      queryClient.invalidateQueries({ queryKey: ["custom-fonts"] });
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to download font");
+    },
+  });
+
   return (
     <div className="flex flex-col gap-4">
       {/* ── Visual Style ── */}
@@ -338,6 +354,48 @@ function AppearanceSettings() {
           Open Fonts Folder
         </button>
       </label>
+
+      {/* ── Google Fonts ── */}
+      <div className="flex flex-col gap-1.5">
+        <span className="text-xs font-medium inline-flex items-center gap-1">
+          Google Fonts{" "}
+          <HelpTooltip text="Download a font directly from Google Fonts by name. Browse available fonts at fonts.google.com and type the exact name here." />
+        </span>
+        <div className="flex gap-1.5">
+          <input
+            type="text"
+            value={googleFontName}
+            onChange={(e) => setGoogleFontName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && googleFontName.trim() && !googleFontMutation.isPending) {
+                googleFontMutation.mutate(googleFontName.trim());
+              }
+            }}
+            placeholder="e.g. Fira Code, Lora, Poppins…"
+            className="flex-1 rounded-lg bg-[var(--secondary)] px-3 py-1.5 text-xs outline-none ring-1 ring-transparent transition-shadow placeholder:text-[var(--muted-foreground)]/50 focus:ring-[var(--primary)]"
+          />
+          <button
+            onClick={() => googleFontMutation.mutate(googleFontName.trim())}
+            disabled={!googleFontName.trim() || googleFontMutation.isPending}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--primary)] px-3 py-1.5 text-[0.6875rem] font-medium text-[var(--primary-foreground)] transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {googleFontMutation.isPending ? (
+              <Loader2 size="0.75rem" className="animate-spin" />
+            ) : (
+              <Download size="0.75rem" />
+            )}
+            {googleFontMutation.isPending ? "Downloading…" : "Add"}
+          </button>
+        </div>
+        <a
+          href="https://fonts.google.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[0.625rem] text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors inline-flex items-center gap-1"
+        >
+          Browse fonts at fonts.google.com →
+        </a>
+      </div>
 
       <label className="flex flex-col gap-1">
         <span className="text-xs font-medium inline-flex items-center gap-1">

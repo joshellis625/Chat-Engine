@@ -112,7 +112,7 @@ export function EditAgentModal({ open, onClose, agent }: Props) {
       <div className="flex flex-col gap-3">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--y2k-pink)] to-[var(--y2k-purple)] shadow-lg shadow-[var(--y2k-pink)]/20">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--primary)] text-[var(--primary-foreground)] shadow-lg">
             <Sparkles size="1.375rem" className="text-white" />
           </div>
           <div className="flex-1">

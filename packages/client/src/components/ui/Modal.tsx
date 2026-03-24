@@ -72,6 +72,10 @@ export function Modal({ open, onClose, title, children, width = "max-w-md" }: Mo
   return (
     <div
       ref={overlayRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      data-component="Modal"
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{
         opacity: isEntering ? 1 : 0,
@@ -103,11 +107,11 @@ export function Modal({ open, onClose, title, children, width = "max-w-md" }: Mo
         {/* Pastel gradient title bar */}
         <div className="pastel-gradient h-[0.1875rem]" />
         {/* Header */}
-        <div className="shrink-0 flex items-center justify-between border-b border-[var(--y2k-purple)]/20 px-5 py-3.5">
-          <h2 className="text-sm font-semibold text-[var(--y2k-lavender)]">{title}</h2>
+        <div className="shrink-0 flex items-center justify-between border-b border-[var(--border)]/30 px-5 py-3.5">
+          <h2 className="text-sm font-semibold text-[var(--foreground)]">{title}</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-[var(--muted-foreground)] transition-colors hover:bg-[var(--accent)] hover:text-[var(--y2k-pink)]"
+            className="rounded-lg p-1 text-[var(--muted-foreground)] transition-colors hover:bg-[var(--accent)] hover:text-[var(--primary)]"
           >
             <X size="1rem" />
           </button>
