@@ -2,7 +2,7 @@
 // Chat: Manage Chat Files — switch between branches
 // Like SillyTavern's "Manage chat files" feature
 // ──────────────────────────────────────────────
-import { X, Plus, Trash2, FileText, MessageSquare } from "lucide-react";
+import { X, Plus, Trash2, FileText, MessageSquare, Download } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useChatGroup, useCreateChat, useDeleteChat, useDeleteChatGroup, useExportChat } from "../../hooks/use-chats";
 import { useChatStore } from "../../stores/chat.store";
@@ -76,29 +76,25 @@ export function ChatFilesDrawer({ chat, open, onClose }: ChatFilesDrawerProps) {
             </button>
           </div>
           <div className="border-b border-[var(--border)] px-4 py-3">
-            <button
-              onClick={() => exportChat.mutate(chat.id)}
-              disabled={exportChat.isPending}
-              className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-[var(--secondary)] px-3 py-2.5 text-xs font-medium text-[var(--foreground)] ring-1 ring-[var(--border)] transition-all hover:bg-[var(--accent)] active:scale-[0.98] disabled:opacity-50"
-            >
-              <svg
-                width="0.8125rem"
-                height="0.8125rem"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+            <p className="mb-1.5 text-[0.625rem] font-medium uppercase tracking-wider text-[var(--muted-foreground)]/60">Export Chat</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => exportChat.mutate({ chatId: chat.id, format: "jsonl" })}
+                disabled={exportChat.isPending}
+                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[var(--secondary)] px-3 py-2.5 text-xs font-medium text-[var(--foreground)] ring-1 ring-[var(--border)] transition-all hover:bg-[var(--accent)] active:scale-[0.98] disabled:opacity-50"
               >
-                <path
-                  d="M10 13V3m0 0l-4 4m4-4l4 4"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <rect x="3" y="15" width="14" height="2" rx="1" fill="currentColor" />
-              </svg>
-              Export Chat
-            </button>
+                <Download size="0.8125rem" />
+                JSONL
+              </button>
+              <button
+                onClick={() => exportChat.mutate({ chatId: chat.id, format: "text" })}
+                disabled={exportChat.isPending}
+                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[var(--secondary)] px-3 py-2.5 text-xs font-medium text-[var(--foreground)] ring-1 ring-[var(--border)] transition-all hover:bg-[var(--accent)] active:scale-[0.98] disabled:opacity-50"
+              >
+                <FileText size="0.8125rem" />
+                Text
+              </button>
+            </div>
           </div>
           <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
             <FileText size="2rem" className="text-[var(--muted-foreground)]/40" />
@@ -140,29 +136,25 @@ export function ChatFilesDrawer({ chat, open, onClose }: ChatFilesDrawerProps) {
             <Plus size="0.8125rem" />
             Start New Chat
           </button>
-          <button
-            onClick={() => exportChat.mutate(activeChatId ?? chat.id)}
-            disabled={exportChat.isPending}
-            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl bg-[var(--secondary)] px-3 py-2.5 text-xs font-medium text-[var(--foreground)] ring-1 ring-[var(--border)] transition-all hover:bg-[var(--accent)] active:scale-[0.98] disabled:opacity-50"
-          >
-            <svg
-              width="0.8125rem"
-              height="0.8125rem"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+          <p className="mt-1.5 mb-1.5 text-[0.625rem] font-medium uppercase tracking-wider text-[var(--muted-foreground)]/60">Export Chat</p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => exportChat.mutate({ chatId: activeChatId ?? chat.id, format: "jsonl" })}
+              disabled={exportChat.isPending}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[var(--secondary)] px-3 py-2.5 text-xs font-medium text-[var(--foreground)] ring-1 ring-[var(--border)] transition-all hover:bg-[var(--accent)] active:scale-[0.98] disabled:opacity-50"
             >
-              <path
-                d="M10 13V3m0 0l-4 4m4-4l4 4"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <rect x="3" y="15" width="14" height="2" rx="1" fill="currentColor" />
-            </svg>
-            Export Chat
-          </button>
+              <Download size="0.8125rem" />
+              JSONL
+            </button>
+            <button
+              onClick={() => exportChat.mutate({ chatId: activeChatId ?? chat.id, format: "text" })}
+              disabled={exportChat.isPending}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[var(--secondary)] px-3 py-2.5 text-xs font-medium text-[var(--foreground)] ring-1 ring-[var(--border)] transition-all hover:bg-[var(--accent)] active:scale-[0.98] disabled:opacity-50"
+            >
+              <FileText size="0.8125rem" />
+              Text
+            </button>
+          </div>
           <p className="mt-2 text-center text-[0.625rem] text-[var(--muted-foreground)]/60">
             {chatFiles.length} chat file{chatFiles.length !== 1 ? "s" : ""} in this group
           </p>

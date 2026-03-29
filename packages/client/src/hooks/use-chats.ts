@@ -258,15 +258,16 @@ export function usePeekPrompt() {
   });
 }
 
-/** Export a chat as JSONL */
+/** Export a chat as JSONL or plain text */
 export function useExportChat() {
   return useMutation({
-    mutationFn: async (chatId: string) => {
-      const res = await fetch(`/api/chats/${chatId}/export`);
+    mutationFn: async ({ chatId, format = "jsonl" }: { chatId: string; format?: "jsonl" | "text" }) => {
+      const res = await fetch(`/api/chats/${chatId}/export?format=${format}`);
       const blob = await res.blob();
       const disposition = res.headers.get("Content-Disposition") ?? "";
       const match = disposition.match(/filename="(.+?)"/);
-      const filename = match?.[1] ? decodeURIComponent(match[1]) : `chat-${chatId}.jsonl`;
+      const ext = format === "text" ? ".txt" : ".jsonl";
+      const filename = match?.[1] ? decodeURIComponent(match[1]) : `chat-${chatId}${ext}`;
       // Download via blob
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");

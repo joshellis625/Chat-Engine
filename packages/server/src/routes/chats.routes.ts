@@ -9,7 +9,7 @@ import { createRegexScriptsStorage } from "../services/storage/regex-scripts.sto
 import { wrapContent } from "../services/prompt/format-engine.js";
 import { newId } from "../utils/id-generator.js";
 import { characters } from "../db/schema/index.js";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 export async function chatsRoutes(app: FastifyInstance) {
   const storage = createChatsStorage(app.db);
@@ -713,12 +713,13 @@ export async function chatsRoutes(app: FastifyInstance) {
 
   // ── Export ──
 
-  // Export chat as JSONL (SillyTavern-compatible format)
-  app.get<{ Params: { id: string } }>("/:id/export", async (req, reply) => {
+  // Export chat — supports JSONL (default, SillyTavern-compatible) and plain text
+  app.get<{ Params: { id: string }; Querystring: { format?: string } }>("/:id/export", async (req, reply) => {
     const chat = await storage.getById(req.params.id);
     if (!chat) return reply.status(404).send({ error: "Chat not found" });
 
     const msgs = await storage.listMessages(req.params.id);
+    const format = (req.query.format ?? "jsonl").toLowerCase();
 
     // Parse characterIds to resolve character names
     const charIds: string[] = (() => {
@@ -729,38 +730,63 @@ export async function chatsRoutes(app: FastifyInstance) {
       }
     })();
 
-    // Resolve primary character name
-    let characterName = chat.name;
+    // Build a characterId → name map for all characters in this chat
+    const charNameMap = new Map<string, string>();
     if (charIds.length > 0) {
       try {
-        const rows = await app.db.select().from(characters).where(eq(characters.id, charIds[0]!));
-        if (rows[0]) {
-          const data = JSON.parse(rows[0].data);
-          characterName = data?.name ?? chat.name;
+        const rows = await app.db.select().from(characters).where(inArray(characters.id, charIds));
+        for (const row of rows) {
+          const data = JSON.parse(row.data);
+          if (data?.name) charNameMap.set(row.id, data.name);
         }
       } catch {
-        // use chat name
+        // fall through — use chat name as fallback
       }
     }
+    const primaryCharName = (charIds[0] && charNameMap.get(charIds[0])) ?? chat.name;
 
-    // Build JSONL lines
+    // Resolve display name for a message
+    const getDisplayName = (msg: { role: string; characterId?: string | null }) => {
+      if (msg.role === "user") return "User";
+      if (msg.role === "system") return "System";
+      if (msg.role === "narrator") return "Narrator";
+      if (msg.characterId && charNameMap.has(msg.characterId)) return charNameMap.get(msg.characterId)!;
+      return primaryCharName;
+    };
+
+    // ── Plain text format ──
+    if (format === "text") {
+      const header = `Chat: ${chat.name}\nDate: ${chat.createdAt}\n${"─".repeat(50)}\n`;
+      const body = msgs
+        .map((msg) => {
+          const name = getDisplayName(msg);
+          const ts = msg.createdAt ? new Date(msg.createdAt).toLocaleString() : "";
+          return `[${name}]${ts ? ` (${ts})` : ""}\n${msg.content}`;
+        })
+        .join("\n\n");
+
+      return reply
+        .header("Content-Type", "text/plain; charset=utf-8")
+        .header("Content-Disposition", `attachment; filename="${encodeURIComponent(chat.name)}.txt"`)
+        .send(header + body);
+    }
+
+    // ── JSONL format (default) ──
     const lines: string[] = [];
 
-    // Header line
     lines.push(
       JSON.stringify({
         user_name: "User",
-        character_name: characterName,
+        character_name: primaryCharName,
         create_date: chat.createdAt,
         chat_metadata: {},
       }),
     );
 
-    // Message lines
     for (const msg of msgs) {
       lines.push(
         JSON.stringify({
-          name: msg.role === "user" ? "User" : characterName,
+          name: getDisplayName(msg),
           is_user: msg.role === "user",
           is_system: msg.role === "system" || msg.role === "narrator",
           mes: msg.content,
@@ -769,12 +795,10 @@ export async function chatsRoutes(app: FastifyInstance) {
       );
     }
 
-    const jsonl = lines.join("\n");
-
     return reply
       .header("Content-Type", "application/jsonl")
       .header("Content-Disposition", `attachment; filename="${encodeURIComponent(chat.name)}.jsonl"`)
-      .send(jsonl);
+      .send(lines.join("\n"));
   });
 
   // ── Branch (duplicate) ──
