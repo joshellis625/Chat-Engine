@@ -180,7 +180,7 @@ Git-based installs update automatically. If you launch Marinara Engine via `star
 
 This includes installs created by the Windows installer, because the installer clones the repository and keeps the `.git` directory.
 
-In-app update checks read the latest GitHub Release tag. If you use Docker, the app shows the pull command instead of updating automatically. Docker images are published from `v*` tags.
+In-app update checks use the newest GitHub `v*` tag and matching release metadata when available. If you use Docker, the app shows the pull command instead of updating automatically. Docker images are published from `v*` tags.
 
 #### In-App Update Check
 
@@ -344,6 +344,7 @@ Copy `.env.example` to `.env` to customize:
 | `AUTO_OPEN_BROWSER` | `true` | Whether the shell launchers auto-open the local app URL. Set to `false`, `0`, `no`, or `off` to disable. Does not apply to the Android WebView wrapper. |
 | `DATABASE_URL` | `file:./data/marinara-engine.db` | SQLite database path. Relative file paths resolve from `packages/server` for compatibility with existing local installs. |
 | `ENCRYPTION_KEY` | _(empty)_ | AES key for API key encryption (generate with `openssl rand -hex 32`) |
+| `ADMIN_SECRET` | _(empty)_ | Optional shared secret for destructive admin endpoints such as `/api/admin/clear-all` |
 | `LOG_LEVEL` | `info` | Logging verbosity |
 | `CORS_ORIGINS` | `http://localhost:5173,http://127.0.0.1:5173` | Allowed CORS origins. Set `*` for allow-all without credentials; explicit origin lists keep credentialed CORS support. |
 | `SSL_CERT` | _(empty)_ | Path to the TLS certificate. Set both `SSL_CERT` and `SSL_KEY` to enable HTTPS. |
