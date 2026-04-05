@@ -120,10 +120,15 @@ export function EchoChamberPanel() {
       .then((msgs) => {
         if (useAgentStore.getState().echoLoadedChatId !== activeChatId) return; // stale
         if (msgs.length > 0) {
+          // If real-time messages already arrived (via addEchoMessage from SSE),
+          // don't overwrite visibleCount — the stagger timer owns it.
+          const alreadyHasMessages = useAgentStore.getState().echoMessages.length > 0;
           setEchoMessages(msgs);
-          // Show all loaded messages immediately (no stagger for persisted data)
-          setEchoVisibleCount(msgs.length);
-          setEchoBaseline(msgs.length);
+          if (!alreadyHasMessages) {
+            // Fresh load (page refresh) — show all persisted immediately
+            setEchoVisibleCount(msgs.length);
+            setEchoBaseline(msgs.length);
+          }
         }
       })
       .catch(() => {

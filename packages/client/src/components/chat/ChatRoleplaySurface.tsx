@@ -690,7 +690,6 @@ export function ChatRoleplaySurface({
   isGrouped,
 }: RoleplaySurfaceProps) {
   const linkedChatName = chat?.connectedChatId ? allChats?.find((c) => c.id === chat.connectedChatId)?.name : undefined;
-  const echoChamberOpen = useUIStore((s) => s.echoChamberOpen);
 
   return (
     <div data-component="ChatArea.Roleplay" className="flex flex-1 overflow-hidden">
@@ -1062,11 +1061,10 @@ export function ChatRoleplaySurface({
           </div>
         </div>
 
-        {echoChamberOpen && (
-          <Suspense fallback={null}>
-            <EchoChamberPanel />
-          </Suspense>
-        )}
+        {/* Always mount so stagger timer runs even when panel is hidden */}
+        <Suspense fallback={null}>
+          <EchoChamberPanel />
+        </Suspense>
       </div>
 
       {expressionAgentEnabled && spritePosition === "right" && spriteCharacterIds.length > 0 && (
