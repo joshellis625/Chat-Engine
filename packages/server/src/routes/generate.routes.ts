@@ -4132,29 +4132,48 @@ export async function generateRoutes(app: FastifyInstance) {
               | undefined;
             if (spriteData.expressions && availableSprites) {
               spriteData.expressions = spriteData.expressions.filter((entry) => {
-                const charSprites = availableSprites.find((s) => s.characterId === entry.characterId);
+                let charSprites = availableSprites.find((s) => s.characterId === entry.characterId);
+                // Fallback: match by name if the LLM hallucinated a slug or name instead of the real ID
+                if (!charSprites) {
+                  const entryLower = entry.characterId.toLowerCase().replace(/[^a-z0-9]/g, "");
+                  charSprites = availableSprites.find((s) => {
+                    const nameLower = s.characterName.toLowerCase().replace(/[^a-z0-9]/g, "");
+                    return nameLower === entryLower || nameLower.includes(entryLower) || entryLower.includes(nameLower);
+                  });
+                  if (charSprites) {
+                    console.warn(
+                      `[generate] Expression agent used "${entry.characterId}" — resolved to ${charSprites.characterName} (${charSprites.characterId})`,
+                    );
+                    entry.characterId = charSprites.characterId;
+                  }
+                }
                 if (!charSprites) {
                   console.warn(
                     `[generate] Expression agent returned unknown character "${entry.characterId}" — removing`,
                   );
                   return false;
                 }
-                if (!charSprites.expressions.includes(entry.expression)) {
-                  // Try a substring/contains match as fallback
-                  const fallback = charSprites.expressions.find(
-                    (e) => e.includes(entry.expression) || entry.expression.includes(e),
+                // Case-insensitive match against available sprite names
+                const exprLower = entry.expression.toLowerCase();
+                const exactMatch = charSprites.expressions.find((e) => e.toLowerCase() === exprLower);
+                if (exactMatch) {
+                  entry.expression = exactMatch;
+                  return true;
+                }
+                // Try a substring/contains match as fallback (case-insensitive)
+                const fallback = charSprites.expressions.find(
+                  (e) => e.toLowerCase().includes(exprLower) || exprLower.includes(e.toLowerCase()),
+                );
+                if (fallback) {
+                  console.warn(
+                    `[generate] Expression agent chose "${entry.expression}" — correcting to closest match "${fallback}"`,
                   );
-                  if (fallback) {
-                    console.warn(
-                      `[generate] Expression agent chose "${entry.expression}" — correcting to closest match "${fallback}"`,
-                    );
-                    entry.expression = fallback;
-                  } else {
-                    console.warn(
-                      `[generate] Expression agent chose "${entry.expression}" for ${charSprites.characterName} which doesn't exist — removing`,
-                    );
-                    return false;
-                  }
+                  entry.expression = fallback;
+                } else {
+                  console.warn(
+                    `[generate] Expression agent chose "${entry.expression}" for ${charSprites.characterName} which doesn't exist — removing`,
+                  );
+                  return false;
                 }
                 return true;
               });
@@ -4291,7 +4310,10 @@ export async function generateRoutes(app: FastifyInstance) {
                   continue;
                 }
                 // Try loading a stored NPC avatar from disk
-                const safeName = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+                const safeName = name
+                  .toLowerCase()
+                  .replace(/[^a-z0-9]+/g, "-")
+                  .replace(/(^-|-$)/g, "");
                 if (safeName) {
                   const npcAvatarPath = join(NPC_AVATAR_DIR, input.chatId, `${safeName}.png`);
                   if (existsSync(npcAvatarPath)) {
@@ -4306,7 +4328,7 @@ export async function generateRoutes(app: FastifyInstance) {
 
               // ── Auto-generate NPC avatars if enabled ──
               const charTrackerAgent = resolvedAgents.find((a) => a.type === "character-tracker");
-              const autoGenAvatars = !!(charTrackerAgent?.settings?.autoGenerateAvatars);
+              const autoGenAvatars = !!charTrackerAgent?.settings?.autoGenerateAvatars;
               const npcImgConnId = (charTrackerAgent?.settings?.imageConnectionId as string) ?? null;
               if (autoGenAvatars && npcImgConnId) {
                 const charsNeedingAvatars = chars.filter(
@@ -4328,7 +4350,11 @@ export async function generateRoutes(app: FastifyInstance) {
                           const npcName = npc.name as string;
                           const appearance = (npc.appearance as string) || "";
                           const outfit = (npc.outfit as string) || "";
-                          const prompt = `Portrait of ${npcName}, ${appearance}${outfit ? `, wearing ${outfit}` : ""}. Character portrait, head and shoulders, detailed face, high quality`.slice(0, 1000);
+                          const prompt =
+                            `Portrait of ${npcName}, ${appearance}${outfit ? `, wearing ${outfit}` : ""}. Character portrait, head and shoulders, detailed face, high quality`.slice(
+                              0,
+                              1000,
+                            );
 
                           const imageResult = await generateImage(imgModel, imgBaseUrl, imgApiKey, {
                             prompt,
@@ -4338,7 +4364,10 @@ export async function generateRoutes(app: FastifyInstance) {
                           });
 
                           // Save to NPC avatars directory
-                          const safeName = npcName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+                          const safeName = npcName
+                            .toLowerCase()
+                            .replace(/[^a-z0-9]+/g, "-")
+                            .replace(/(^-|-$)/g, "");
                           const npcDir = join(NPC_AVATAR_DIR, input.chatId);
                           if (!existsSync(npcDir)) mkdirSync(npcDir, { recursive: true });
                           writeFileSync(join(npcDir, `${safeName}.png`), Buffer.from(imageResult.base64, "base64"));
@@ -4359,7 +4388,9 @@ export async function generateRoutes(app: FastifyInstance) {
                         reply.raw.write(
                           `data: ${JSON.stringify({ type: "game_state_patch", data: { presentCharacters: chars } })}\n\n`,
                         );
-                      } catch { /* stream closed */ }
+                      } catch {
+                        /* stream closed */
+                      }
                     } catch (err) {
                       console.warn(`[character-tracker] Avatar generation error:`, err);
                     }
@@ -4703,6 +4734,7 @@ export async function generateRoutes(app: FastifyInstance) {
             const negativePrompt = ((illData.negativePrompt as string) ?? "").trim();
             const style = ((illData.style as string) ?? "").trim();
             const aspectRatio = ((illData.aspectRatio as string) ?? "portrait").trim();
+            const illCharacters = Array.isArray(illData.characters) ? (illData.characters as string[]) : [];
 
             // Always log what the illustrator decided
             console.log(
@@ -4751,16 +4783,79 @@ export async function generateRoutes(app: FastifyInstance) {
                     }
 
                     // Prepend style to the prompt for better results
-                    const fullPrompt = style ? `${style}, ${imagePrompt}` : imagePrompt;
+                    let fullPrompt = style ? `${style}, ${imagePrompt}` : imagePrompt;
 
                     console.log(`[illustrator] Starting image generation (${imgWidth}x${imgHeight})...`);
 
-                    // Try to read the first character's avatar for reference image consistency
-                    const firstCharId = characterIds[0];
+                    // Collect avatar reference images when the setting is enabled
+                    const useAvatarRefs = illustratorAgent?.settings?.useAvatarReferences === true;
                     let illustratorRefImage: string | undefined;
-                    if (firstCharId) {
-                      const refCharRow = await chars.getById(firstCharId);
-                      illustratorRefImage = readAvatarBase64(refCharRow?.avatarPath as string | null);
+                    let illustratorRefImages: string[] | undefined;
+                    if (useAvatarRefs) {
+                      // Match character names from the Illustrator's output to character IDs.
+                      // The LLM picks which characters are visible in the image via the "characters" field.
+                      // If it didn't specify any, fall back to all characters in the chat.
+                      const illCharLower = illCharacters.map((n) => n.toLowerCase().trim());
+                      const relevantCharIds =
+                        illCharLower.length > 0
+                          ? charInfo
+                              .filter((c) => illCharLower.some((n) => c.name.toLowerCase() === n))
+                              .map((c) => c.id)
+                          : characterIds;
+                      const includePersona =
+                        illCharLower.length === 0 || illCharLower.some((n) => n === personaName.toLowerCase());
+
+                      // Collect avatar reference images for chosen characters + persona
+                      const refImages: string[] = [];
+                      for (const cid of relevantCharIds) {
+                        const ci = charInfo.find((c) => c.id === cid);
+                        if (!ci?.avatarPath) continue;
+                        const b64 = readAvatarBase64(ci.avatarPath);
+                        if (b64) refImages.push(b64);
+                      }
+                      if (includePersona && persona?.avatarPath) {
+                        const personaB64 = readAvatarBase64(persona.avatarPath as string | null);
+                        if (personaB64) refImages.push(personaB64);
+                      }
+                      if (refImages.length > 0) {
+                        illustratorRefImages = refImages;
+                        console.log(
+                          `[illustrator] Sending ${refImages.length} avatar reference(s) for: ${illCharLower.length > 0 ? illCharacters.join(", ") : "all characters"}`,
+                        );
+                      }
+
+                      // Build character appearance descriptions and augment the prompt
+                      const appearanceLines: string[] = [];
+                      for (const cid of relevantCharIds) {
+                        const ci = charInfo.find((c) => c.id === cid);
+                        if (!ci) continue;
+                        const visual = ci.appearance || ci.description;
+                        if (visual) appearanceLines.push(`${ci.name}: ${visual}`);
+                      }
+                      if (includePersona && persona) {
+                        const pAppearance = (persona as any).appearance ?? "";
+                        if (pAppearance) appearanceLines.push(`${personaName}: ${pAppearance}`);
+                      }
+                      if (appearanceLines.length > 0 || illustratorRefImages) {
+                        const parts: string[] = [];
+                        if (illustratorRefImages) {
+                          parts.push(
+                            "Reference images of the characters are attached. " +
+                              "Use them closely to match each character's exact visual appearance — face, hair, eyes, build, etc.",
+                          );
+                        }
+                        if (appearanceLines.length > 0) {
+                          parts.push("Character visual descriptions:\n" + appearanceLines.join("\n"));
+                        }
+                        fullPrompt = fullPrompt + "\n\n" + parts.join("\n");
+                      }
+                    } else {
+                      // Legacy: only the first character's avatar
+                      const firstCharId = characterIds[0];
+                      if (firstCharId) {
+                        const refCharRow = await chars.getById(firstCharId);
+                        illustratorRefImage = readAvatarBase64(refCharRow?.avatarPath as string | null);
+                      }
                     }
 
                     const imageResult = await generateImage(imgModel, imgBaseUrl, imgApiKey, {
@@ -4771,6 +4866,7 @@ export async function generateRoutes(app: FastifyInstance) {
                       height: imgHeight,
                       comfyWorkflow: (imgConnFull as any).comfyuiWorkflow || undefined,
                       referenceImage: illustratorRefImage,
+                      referenceImages: illustratorRefImages,
                     });
 
                     // Save to disk

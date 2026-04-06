@@ -86,12 +86,13 @@ If no issues found, return: { "issues": [], "verdict": "clean" }`,
 
   /* ────────────────────────────────────────── */
   expression: `Analyze the emotional state of each character in the latest assistant message and pick the best matching sprite expression from their AVAILABLE sprites, listed in <available_sprites>.
+The <available_sprites> block lists characters in the format: CharacterName (CharacterID): expression1, expression2, ...
 Respond ONLY with valid JSON.
 Output format:
 {
   "expressions": [
     {
-      "characterId": "string",
+      "characterId": "string (MUST be the exact CharacterID from the parentheses in <available_sprites>)",
       "characterName": "string",
       "expression": "string (MUST be one of the character's available sprite names)",
       "transition": "crossfade | bounce | shake | hop | none"
@@ -106,7 +107,8 @@ Transition guide:
 - none: instant swap (neutral reset, very minor change).
 Instructions:
 1. ONLY include characters listed in <available_sprites>. If a character is not listed there, do NOT include them.
-2. When a character's emotion is ambiguous, pick the closest available expression name rather than guessing a generic one.`,
+2. The characterId MUST be the exact ID string from the parentheses, e.g. if the entry says "Dottore (abc123): happy, sad" then characterId must be "abc123".
+3. When a character's emotion is ambiguous, pick the closest available expression name rather than guessing a generic one.`,
 
   /* ────────────────────────────────────────── */
   "echo-chamber": `Simulate a live streaming-service chat full of anonymous viewers reacting to the roleplay on screen. Generate a batch of short messages from fictional viewers commenting on the latest story beat.
@@ -204,7 +206,8 @@ Output format:
   "prompt": "string — detailed image generation prompt if shouldGenerate is true",
   "negativePrompt": "string — what to avoid in generation",
   "style": "string — art style suggestion (fantasy painting, anime, watercolor, etc.)",
-  "aspectRatio": "landscape|portrait|square"
+  "aspectRatio": "landscape|portrait|square",
+  "characters": ["string — names of characters (and/or the user's persona) visible in this image, used to attach their avatar as a visual reference to the image model"]
 }
 Prompt quality rules:
 1. Be specific about composition, lighting, mood, and camera angle.

@@ -33,6 +33,8 @@ export interface ImageGenRequest {
   comfyWorkflow?: string;
   /** Optional base64-encoded reference image for img2img / character consistency. */
   referenceImage?: string;
+  /** Optional array of base64-encoded reference images (avatars). Providers that support multiple refs use all; others use the first. */
+  referenceImages?: string[];
 }
 
 export interface ImageGenResult {
@@ -165,6 +167,14 @@ async function generateStability(baseUrl: string, apiKey: string, request: Image
     );
     formData.append("strength", "0.5");
     formData.append("mode", "image-to-image");
+  } else if (request.referenceImages?.length) {
+    formData.append(
+      "image",
+      new Blob([Buffer.from(request.referenceImages[0]!, "base64")], { type: "image/png" }),
+      "reference.png",
+    );
+    formData.append("strength", "0.5");
+    formData.append("mode", "image-to-image");
   }
   formData.append("output_format", "png");
 
@@ -264,6 +274,10 @@ async function generateNovelAI(baseUrl: string, apiKey: string, request: ImageGe
       parameters.reference_image_multiple = [request.referenceImage];
       parameters.reference_information_extracted_multiple = [1];
       parameters.reference_strength_multiple = [0.6];
+    } else if (request.referenceImages?.length) {
+      parameters.reference_image_multiple = request.referenceImages;
+      parameters.reference_information_extracted_multiple = request.referenceImages.map(() => 1);
+      parameters.reference_strength_multiple = request.referenceImages.map(() => 0.6);
     } else {
       parameters.reference_image_multiple = [];
       parameters.reference_information_extracted_multiple = [];
@@ -400,6 +414,20 @@ async function generateViaChatCompletions(
 ): Promise<ImageGenResult> {
   const url = `${baseUrl.replace(/\/+$/, "")}/chat/completions`;
 
+  // Build multimodal content parts: reference images first, then the text prompt
+  const refImages = request.referenceImages ?? (request.referenceImage ? [request.referenceImage] : []);
+  let messageContent: string | Array<Record<string, unknown>>;
+  if (refImages.length > 0) {
+    const parts: Array<Record<string, unknown>> = refImages.map((b64) => ({
+      type: "image_url",
+      image_url: { url: `data:image/png;base64,${b64}` },
+    }));
+    parts.push({ type: "text", text: request.prompt });
+    messageContent = parts;
+  } else {
+    messageContent = request.prompt;
+  }
+
   const resp = await fetch(url, {
     method: "POST",
     headers: {
@@ -408,7 +436,7 @@ async function generateViaChatCompletions(
     },
     body: JSON.stringify({
       model: request.model || "nai-diffusion-4-5-full",
-      messages: [{ role: "user", content: request.prompt }],
+      messages: [{ role: "user", content: messageContent }],
       stream: false,
       temperature: 0.7,
     }),
@@ -530,6 +558,8 @@ async function generateComfyUI(baseUrl: string, request: ImageGenRequest): Promi
   }
   if (request.referenceImage) {
     wfStr = wfStr.replace(/%reference_image%/g, request.referenceImage.replace(/"/g, '\\"'));
+  } else if (request.referenceImages?.length) {
+    wfStr = wfStr.replace(/%reference_image%/g, request.referenceImages[0]!.replace(/"/g, '\\"'));
   }
   const resolvedWorkflow = JSON.parse(wfStr);
 
@@ -598,7 +628,7 @@ async function generateComfyUI(baseUrl: string, request: ImageGenRequest): Promi
 
 async function generateAutomatic1111(baseUrl: string, request: ImageGenRequest): Promise<ImageGenResult> {
   const base = baseUrl.replace(/\/+$/, "");
-  const useImg2Img = !!request.referenceImage;
+  const useImg2Img = !!(request.referenceImage || request.referenceImages?.length);
   const body: Record<string, unknown> = {
     prompt: request.prompt,
     negative_prompt: request.negativePrompt || "",
@@ -615,7 +645,7 @@ async function generateAutomatic1111(baseUrl: string, request: ImageGenRequest):
     body.override_settings = { sd_model_checkpoint: request.model };
   }
   if (useImg2Img) {
-    body.init_images = [request.referenceImage];
+    body.init_images = [request.referenceImage ?? request.referenceImages?.[0]];
     body.denoising_strength = 0.6;
   }
 

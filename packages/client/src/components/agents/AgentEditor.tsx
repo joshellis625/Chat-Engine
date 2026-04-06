@@ -119,6 +119,7 @@ export function AgentEditor() {
   const [localSourceLorebookIds, setLocalSourceLorebookIds] = useState<string[]>([]);
   const [localSourceFileIds, setLocalSourceFileIds] = useState<string[]>([]);
   const [localAutoGenerateAvatars, setLocalAutoGenerateAvatars] = useState(false);
+  const [localUseAvatarReferences, setLocalUseAvatarReferences] = useState(false);
   const [spotifyStatus, setSpotifyStatus] = useState<{
     connected: boolean;
     expired: boolean;
@@ -155,8 +156,9 @@ export function AgentEditor() {
         if (saved) {
           setLocalImageConnectionId(saved);
         } else {
-          const defaultImgConnDb = (connections as Array<{ id: string; provider: string }> | undefined)
-            ?.find((c) => c.provider === "image_generation");
+          const defaultImgConnDb = (connections as Array<{ id: string; provider: string }> | undefined)?.find(
+            (c) => c.provider === "image_generation",
+          );
           setLocalImageConnectionId(defaultImgConnDb?.id ?? "");
         }
       }
@@ -167,6 +169,7 @@ export function AgentEditor() {
       setLocalSourceLorebookIds(settings.sourceLorebookIds ?? []);
       setLocalSourceFileIds(settings.sourceFileIds ?? []);
       setLocalAutoGenerateAvatars(settings.autoGenerateAvatars ?? false);
+      setLocalUseAvatarReferences(settings.useAvatarReferences ?? false);
       setLocalPrompt(dbConfig.promptTemplate || "");
     } else if (builtIn) {
       setLocalName(builtIn.name);
@@ -174,8 +177,9 @@ export function AgentEditor() {
       setLocalPhase(builtIn.phase);
       setLocalConnectionId("");
       // Default image connection to the first image_generation provider when creating a new agent
-      const defaultImgConn = (connections as Array<{ id: string; provider: string }> | undefined)
-        ?.find((c) => c.provider === "image_generation");
+      const defaultImgConn = (connections as Array<{ id: string; provider: string }> | undefined)?.find(
+        (c) => c.provider === "image_generation",
+      );
       setLocalImageConnectionId(defaultImgConn?.id ?? "");
       setLocalContextSize("");
       setLocalRunInterval("");
@@ -185,6 +189,7 @@ export function AgentEditor() {
       setLocalSourceLorebookIds([]);
       setLocalSourceFileIds([]);
       setLocalAutoGenerateAvatars(false);
+      setLocalUseAvatarReferences(false);
       setLocalPrompt("");
     } else {
       // Brand new custom agent — start empty
@@ -192,8 +197,9 @@ export function AgentEditor() {
       setLocalDescription("");
       setLocalPhase("post_processing");
       setLocalConnectionId("");
-      const defaultImgConnNew = (connections as Array<{ id: string; provider: string }> | undefined)
-        ?.find((c) => c.provider === "image_generation");
+      const defaultImgConnNew = (connections as Array<{ id: string; provider: string }> | undefined)?.find(
+        (c) => c.provider === "image_generation",
+      );
       setLocalImageConnectionId(defaultImgConnNew?.id ?? "");
       setLocalContextSize("");
       setLocalRunInterval("");
@@ -203,6 +209,7 @@ export function AgentEditor() {
       setLocalSourceLorebookIds([]);
       setLocalSourceFileIds([]);
       setLocalAutoGenerateAvatars(false);
+      setLocalUseAvatarReferences(false);
       setLocalPrompt("");
     }
     setDirty(false);
@@ -287,6 +294,7 @@ export function AgentEditor() {
         ...(localSourceFileIds.length > 0 ? { sourceFileIds: localSourceFileIds } : {}),
         ...(localImageConnectionId ? { imageConnectionId: localImageConnectionId } : {}),
         ...(localAutoGenerateAvatars ? { autoGenerateAvatars: true } : {}),
+        ...(localUseAvatarReferences ? { useAvatarReferences: true } : {}),
       },
     };
 
@@ -333,6 +341,7 @@ export function AgentEditor() {
     localSourceLorebookIds,
     localSourceFileIds,
     localAutoGenerateAvatars,
+    localUseAvatarReferences,
     dbConfig,
     builtIn,
     updateAgent,
@@ -580,6 +589,22 @@ export function AgentEditor() {
                 The Illustrator uses two connections: the LLM above analyzes the scene and writes an image prompt, then
                 this connection generates the actual image from that prompt.
               </p>
+              <label className="mt-3 flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={localUseAvatarReferences}
+                  onChange={(e) => {
+                    setLocalUseAvatarReferences(e.target.checked);
+                    markDirty();
+                  }}
+                  className="rounded border-[var(--border)] bg-[var(--secondary)] text-[var(--primary)] focus:ring-[var(--ring)]"
+                />
+                <span className="text-sm">Send character &amp; persona avatars as reference images</span>
+              </label>
+              <p className="mt-1 text-[0.625rem] text-[var(--muted-foreground)]">
+                Sends all character avatars in the scene plus your persona avatar to the image generator for visual
+                reference. Works best with providers that support reference images (NovelAI, Stability, A1111, ComfyUI).
+              </p>
             </FieldGroup>
           )}
 
@@ -604,7 +629,9 @@ export function AgentEditor() {
               </label>
               {localAutoGenerateAvatars && (
                 <div className="mt-2">
-                  <label className="block text-xs text-[var(--muted-foreground)] mb-1">Image Generation Connection</label>
+                  <label className="block text-xs text-[var(--muted-foreground)] mb-1">
+                    Image Generation Connection
+                  </label>
                   <select
                     value={localImageConnectionId}
                     onChange={(e) => {

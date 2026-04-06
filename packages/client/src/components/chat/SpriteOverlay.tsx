@@ -76,6 +76,8 @@ export function SpriteOverlay({
 
   // Subscribe to agent expression results
   const expressionResult = useAgentStore((s) => s.lastResults.get("expression"));
+  // Track which agent result we already applied so we don't re-fire for stale results
+  const appliedResultRef = useRef<unknown>(null);
 
   // Track current expression + transition per character
   const [states, setStates] = useState<Record<string, CharacterExpressionState>>(() => {
@@ -90,33 +92,61 @@ export function SpriteOverlay({
 
   // When agent result arrives, prefer it over keyword detection
   useEffect(() => {
-    if (expressionResult?.success && expressionResult.data) {
+    if (expressionResult?.success && expressionResult.data && expressionResult !== appliedResultRef.current) {
       const data = expressionResult.data as {
         expressions?: Array<{ characterId: string; expression: string; transition?: string }>;
       };
       if (data.expressions?.length) {
+        appliedResultRef.current = expressionResult;
+        const updates: Array<{ characterId: string; expression: string; transition: Transition }> = [];
+        for (const e of data.expressions) {
+          const t = (["crossfade", "bounce", "shake", "hop", "none"] as Transition[]).includes(
+            e.transition as Transition,
+          )
+            ? (e.transition as Transition)
+            : "crossfade";
+          updates.push({ characterId: e.characterId, expression: e.expression, transition: t });
+        }
         setStates((prev) => {
           const next = { ...prev };
-          for (const e of data.expressions!) {
-            const t = (["crossfade", "bounce", "shake", "hop", "none"] as Transition[]).includes(
-              e.transition as Transition,
-            )
-              ? (e.transition as Transition)
-              : "crossfade";
-            next[e.characterId] = { expression: e.expression, transition: t };
-            onExpressionChange?.(e.characterId, e.expression);
+          for (const u of updates) {
+            next[u.characterId] = { expression: u.expression, transition: u.transition };
           }
           return next;
         });
+        // Persist expression changes outside setState to avoid side-effects in updater
+        for (const u of updates) {
+          onExpressionChange?.(u.characterId, u.expression);
+        }
         return;
       }
     }
   }, [expressionResult, onExpressionChange]);
 
+  // Apply saved per-swipe expressions whenever the prop changes (e.g. user swipes).
+  // This runs independently of the agent store so swiping always updates the sprite.
+  const prevSpriteExpressionsRef = useRef(spriteExpressions);
+  useEffect(() => {
+    if (spriteExpressions === prevSpriteExpressionsRef.current) return;
+    prevSpriteExpressionsRef.current = spriteExpressions;
+    if (!spriteExpressions || Object.keys(spriteExpressions).length === 0) return;
+    setStates((prev) => {
+      const next = { ...prev };
+      for (const [id, expr] of Object.entries(spriteExpressions)) {
+        // Only update if the expression actually changed to avoid unnecessary re-renders
+        if (next[id]?.expression !== expr) {
+          next[id] = { expression: expr, transition: "crossfade" };
+        }
+      }
+      return next;
+    });
+  }, [spriteExpressions]);
+
   // Fallback: keyword-based detection when no agent result.
   useEffect(() => {
     if (!messages?.length) return;
-    if (expressionResult?.success && (expressionResult.data as any)?.expressions?.length) return;
+    // Only skip fallback when the current agent result has already been applied
+    if (expressionResult?.success && expressionResult === appliedResultRef.current) return;
 
     const newStates: Record<string, CharacterExpressionState> = {};
 
@@ -160,7 +190,7 @@ export function SpriteOverlay({
   if (visibleChars.length === 0) return null;
 
   return (
-    <div ref={stageRef} className="pointer-events-none absolute inset-0 z-[5] overflow-hidden">
+    <div ref={stageRef} className="pointer-events-none absolute inset-0 z-[15] overflow-hidden">
       {visibleChars.map((charId, index) => (
         <CharacterSprite
           key={charId}
@@ -270,9 +300,18 @@ function CharacterSprite({
   const spriteUrl = useMemo(() => {
     if (!sprites || !(sprites as SpriteInfo[]).length) return null;
     const spriteList = sprites as SpriteInfo[];
-    const exact = spriteList.find((s) => s.expression === expression);
+    const exprLower = expression.toLowerCase();
+    const exact = spriteList.find((s) => s.expression.toLowerCase() === exprLower);
     if (exact) return exact.url;
-    const neutral = spriteList.find((s) => s.expression === "neutral" || s.expression === "default");
+    // Substring / contains fallback (case-insensitive)
+    const partial = spriteList.find(
+      (s) => s.expression.toLowerCase().includes(exprLower) || exprLower.includes(s.expression.toLowerCase()),
+    );
+    if (partial) return partial.url;
+    const neutral = spriteList.find((s) => {
+      const lower = s.expression.toLowerCase();
+      return lower === "neutral" || lower === "default";
+    });
     if (neutral) return neutral.url;
     return spriteList[0]?.url ?? null;
   }, [sprites, expression]);

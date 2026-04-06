@@ -55,11 +55,6 @@ const SpriteOverlay = lazy(async () => {
   return { default: module.SpriteOverlay };
 });
 
-const SpriteSidebar = lazy(async () => {
-  const module = await import("./SpriteSidebar");
-  return { default: module.SpriteSidebar };
-});
-
 const EchoChamberPanel = lazy(async () => {
   const module = await import("./EchoChamberPanel");
   return { default: module.EchoChamberPanel };
@@ -693,17 +688,6 @@ export function ChatRoleplaySurface({
 
   return (
     <div data-component="ChatArea.Roleplay" className="flex flex-1 overflow-hidden">
-      {expressionAgentEnabled && spritePosition === "left" && spriteCharacterIds.length > 0 && (
-        <Suspense fallback={null}>
-          <SpriteSidebar
-            characterIds={spriteCharacterIds}
-            messages={msgPayload}
-            characterMap={characterMap}
-            isRoleplay={isRoleplay}
-          />
-        </Suspense>
-      )}
-
       <div className="rpg-chat-area mari-chat-area relative flex flex-1 flex-col overflow-hidden">
         <CrossfadeBackground url={chatBackground} />
         <div className="rpg-overlay absolute inset-0" />
@@ -1066,17 +1050,6 @@ export function ChatRoleplaySurface({
           <EchoChamberPanel />
         </Suspense>
       </div>
-
-      {expressionAgentEnabled && spritePosition === "right" && spriteCharacterIds.length > 0 && (
-        <Suspense fallback={null}>
-          <SpriteSidebar
-            characterIds={spriteCharacterIds}
-            messages={msgPayload}
-            characterMap={characterMap}
-            isRoleplay={isRoleplay}
-          />
-        </Suspense>
-      )}
 
       <ChatCommonOverlays
         chat={chat}
